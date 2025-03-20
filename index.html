@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"NOTES</title>
+    <style>
+        .center-text {
+            text-align: center;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .login-form {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            margin: 0 auto; /* Center the form */
+        }
+        .login-form input {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .login-form button {
+            padding: 10px;
+            background-color: rgb(71, 169, 219);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .notes-section {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+        }
+        .notes-section textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        .notes-section button {
+            padding: 10px;
+            background-color: rgb(71, 169, 219);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .notes {
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        .hint {
+            font-size: 12px;
+            color: gray;
+            margin-top: -5px;
+            margin-bottom: 10px;
+        }
+        .note-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .delete-button {
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="center-text">
+        <h1>NOTES</h1>
+    </header>
+    <div class="center-text" style="margin-top: 20px;">
+        <h2> "Not a Scam, Just a Letter from a Strange Soul" </h2>
+        <h4> Before you jump to conclusions, rest assured, this is not a scam. 
+            It's just a letter from someone who's a little odd but full of genuine thoughts. 
+            No hidden agendas, just a piece of my heart on paper.</h4>
+    </div>
+    <div class="login-form" style="text-align: center;">
+        <h2>Login</h2>
+        <input type="password" id="password" placeholder="Enter your password" required>
+        <div class="hint">Hint:(6 digits) The moment she said yes".</div>
+        <button id="loginButton">Log In</button>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="notes-section" id="notesSection">
+        <h2>Your Notes</h2>
+        <textarea id="noteInput" placeholder="Write your note here..."></textarea>
+        <button id="saveNoteButton">Save Note</button>
+        <div class="notes" id="savedNotes"></div>
+        <div class="trash-bin" id="trashBin" style="margin-top: 20px;">
+            <h2>Trash Bin</h2>
+            <div class="notes" id="deletedNotes"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load saved notes from local storage
+        let savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+        const savedNotesContainer = document.getElementById('savedNotes');
+
+        function renderNotes() {
+            savedNotesContainer.innerHTML = '';
+            savedNotes.forEach((note, index) => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note-item';
+                noteElement.innerHTML = `
+                    <p>${note.replace(/\n/g, '<br>')}</p>
+                    <button class="delete-button" onclick="deleteNote(${index})">Delete</button>
+                `;
+                savedNotesContainer.appendChild(noteElement);
+            });
+        }
+
+        function renderTrashBin() {
+            const deletedNotesContainer = document.getElementById('deletedNotes');
+            deletedNotesContainer.innerHTML = '';
+            deletedNotes.forEach((note, index) => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note-item';
+                noteElement.innerHTML = `
+                    <p>${note.replace(/\n/g, '<br>')}</p>
+                    <button class="restore-button" onclick="restoreNote(${index})">Restore</button>
+                    <button class="permanent-delete-button" onclick="permanentDelete(${index})">Delete Permanently</button>
+                `;
+                deletedNotesContainer.appendChild(noteElement);
+            });
+        }
+
+        function restoreNote(index) {
+            savedNotes.push(deletedNotes[index]);
+            deletedNotes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(savedNotes));
+            localStorage.setItem('deletedNotes', JSON.stringify(deletedNotes));
+            renderNotes();
+            renderTrashBin();
+        }
+
+        function permanentDelete(index) {
+            deletedNotes.splice(index, 1);
+            localStorage.setItem('deletedNotes', JSON.stringify(deletedNotes));
+            renderTrashBin();
+        }
+
+        document.getElementById('loginButton').addEventListener('click', function() {
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Simple login logic (for demonstration purposes)
+            if (password === '032824') {
+                document.getElementById('notesSection').style.display = 'block';
+                errorMessage.textContent = '';
+            } else {
+                errorMessage.textContent = 'Invalid password.';
+            }
+        });
+
+        document.getElementById('saveNoteButton').addEventListener('click', function() {
+            const noteInput = document.getElementById('noteInput').value;
+
+            if (noteInput) {
+                savedNotes.push(noteInput);
+                localStorage.setItem('notes', JSON.stringify(savedNotes));
+                renderNotes();
+                document.getElementById('noteInput').value = ''; // Clear input
+            }
+        });
+
+        let deletedNotes = [];
+
+        function deleteNote(index) {
+            deletedNotes.push(savedNotes[index]);
+            savedNotes.splice(index, 1);
+
+            localStorage.setItem('notes', JSON.stringify(savedNotes));
+            renderNotes();
+            renderTrashBin();
+        }
+
+        renderNotes();
+    </script>
+</body>
+</html>
